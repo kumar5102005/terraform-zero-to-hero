@@ -1,0 +1,16 @@
+# Ignore Terraform working directories
+**/.terraform/
+*.tfstate
+*.tfstate.*
+crash.log
+crash.*.log
+
+# Ignore variable override files
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore CLI configuration
+.terraformrc
+terraform.rc
