@@ -16,7 +16,7 @@ provider "aws" {
 }
 
 module "aws_ec2_instance" {
-  source = "./modules/ec2_instance"
+  source = "github.com/kumar5102005/terraform-zero-to-hero//Day-2/practice/modules/ec2_instance?ref=main"
   ami_value = var.ami_value
   instance_value = var.instance_value
   subnet_id_value = var.subnet_id_value
