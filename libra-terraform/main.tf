@@ -17,7 +17,7 @@ variable "cidr" {
 
 resource "aws_key_pair" "example" {
   key_name = "libraai-key"
-  public_key = file("phani.pub")
+  public_key = file("${path.module}/phani.pub")
 }
 
 resource "aws_vpc" "vpc" {
@@ -89,7 +89,7 @@ resource "aws_instance" "webserver" {
   connection {
     type        = "ssh"
     user        = "ubuntu" # Standard user for Ubuntu AMIs
-    private_key = file("phani")
+    private_key = file("${path.module}/phani")
     host        = self.public_ip
   }
 
