@@ -102,7 +102,7 @@ resource "aws_instance" "server" {
   #     "sudo apt-get install -y python3-pip",  # Example package installation
   #     "sudo pip3 install flask",
   #     "cd /home/ubuntu",
-  #     "sudo python3 app.py"
+  #     "sudo python3 app.py &"
   #   ]
   # }
 
