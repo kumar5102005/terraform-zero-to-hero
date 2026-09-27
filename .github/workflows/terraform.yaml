@@ -12,17 +12,37 @@ jobs:
     defaults:
       run:
         shell: bash
-        working-directory: Day-2/practice
+        working-directory: Day-5/practice
 
     steps:
       - uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ap-south-2
 
       - uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.6.6
 
       - name: Terraform Init
-        run: terraform init -backend=false
+        run: terraform init
 
-      - name: Terraform Validate
-        run: terraform validate
+      - name: Terraform plan
+        run: terraform plan
+
+      - name: Terraform apply
+        id: tf_apply
+        run: |
+          terraform apply -auto-approve
+          IP=$(terraform output -raw public_ip)
+          echo "server_ip=$IP" >> $GITHUB_OUTPUT
+
+      - name: Use the outputs in a later step
+        run: |
+          echo "Deployed IP: ${{ steps.tf_apply.outputs.server_ip }}"
+
+      
