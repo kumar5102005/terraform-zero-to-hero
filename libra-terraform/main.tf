@@ -1,6 +1,15 @@
- provider "aws" {
-   region = "ap-south-2"
- }
+terraform {
+  backend "s3" {
+    bucket         = "s3-remote-backend-phani"
+    key            = "phani/terraform.tfstate"
+    region         = "ap-south-2"
+    encrypt        = true
+  }
+}
+
+provider "aws" {
+  region = "ap-south-2"
+}
 
 variable "cidr" {
   default = "172.0.0.0/16"
