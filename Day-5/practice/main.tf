@@ -17,7 +17,7 @@ variable "cidr" {
 
 resource "aws_key_pair" "example" {
   key_name = "terraform-key-phani"
-  public_key = file("../libra-terraform/phani.pub")
+  public_key = file("${path.module}/phani.pub")
 }
 
 resource "aws_vpc" "vpc" {
@@ -86,7 +86,7 @@ resource "aws_instance" "server" {
   connection {
     type        = "ssh"
     user        = "ubuntu"  # Replace with the appropriate username for your EC2 instance
-    private_key = file("../libra-terraform/phani")  # Replace with the path to your private key
+    private_key = file("${path.module}/phani")  # Replace with the path to your private key
     host        = self.public_ip
   }
 
