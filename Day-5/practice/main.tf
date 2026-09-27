@@ -103,8 +103,12 @@ resource "aws_instance" "server" {
     "echo 'Hello from the remote instance'",
     "sudo apt update -y",
     "sudo apt-get install -y python3-pip python3-flask", # Installs flask system-wide via apt
-    "sudo python3 /home/ubuntu/app.py"                    # Use full path to app.py
+    "sudo python3 /home/ubuntu/app.py &"                    # Use full path to app.py
   ]
 }
 
+}
+
+output "public_ip" {
+  value = aws_instance.server.public_ip
 }
