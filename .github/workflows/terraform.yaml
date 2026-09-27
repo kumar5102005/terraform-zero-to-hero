@@ -1,0 +1,14 @@
+name: CI/CD intergrating with terraform
+
+on:
+  push: 
+    branches: 
+      - main
+
+jobs:
+  libraai-automation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: checkout repository
+        uses: actions/checkout@v4
