@@ -12,3 +12,6 @@ jobs:
     steps:
       - name: checkout repository
         uses: actions/checkout@v4
+
+      - name: list the folders
+        run: ls
