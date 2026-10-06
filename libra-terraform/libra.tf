@@ -1,84 +1,138 @@
-# provider "aws" {
-#   region = "ap-south-2"
-# }
+provider "aws" {
+  region = "ap-south-2"
+}
 
-# variable "cidr" {
-#   default = "172.0.0.0/16"
-# }
+variable "cidr" {
+  default = "172.0.0.0/16"
+}
 
-# resource "aws_key_pair" "example" {
-#   key_name = "libraai-key"
-#   public_key = file("phani.pub")
-# }
+resource "aws_key_pair" "example" {
+  key_name = "libraai-key"
+  public_key = file("phani.pub")
+}
 
-# resource "aws_vpc" "vpc" {
-#   cidr_block = var.cidr
-# }
+resource "aws_vpc" "vpc" {
+  cidr_block = var.cidr
+}
 
-# resource "aws_subnet" "pub_sub_01" {
-#   vpc_id = aws_vpc.vpc.id
-#   cidr_block = "172.0.0.0/24"
-#   availability_zone = "ap-south-2a"
-#   map_public_ip_on_launch = true
-# }
+resource "aws_subnet" "pub_sub_01" {
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = "172.0.0.0/24"
+  availability_zone = "ap-south-2a"
+  map_public_ip_on_launch = true
+}
 
-# resource "aws_subnet" "pub_sub_02" {
-#   vpc_id = aws_vpc.vpc.id
-#   cidr_block = "172.0.1.0/24"
-#   availability_zone = "ap-south-2b"
-#   map_public_ip_on_launch = true
-# }
+resource "aws_subnet" "pub_sub_02" {
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = "172.0.1.0/24"
+  availability_zone = "ap-south-2b"
+  map_public_ip_on_launch = true
+}
 
-# resource "aws_internet_gateway" "igw" {
-#   vpc_id = aws_vpc.vpc.id
-# }
+resource "aws_subnet" "private_sub_01" {
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = "172.0.2.0/24"
+  availability_zone = "ap-south-2a"
+}
 
-# resource "aws_route_table" "rt01" {
-#   vpc_id = aws_vpc.vpc.id
+resource "aws_subnet" "private_sub_02" {
+  vpc_id = aws_vpc.vpc.id
+  cidr_block = "172.0.3.0/24"
+  availability_zone = "ap-south-2b"
+}
 
-#   route {
-#     cidr_block = "0.0.0.0/0"
-#     gateway_id = aws_internet_gateway.igw.id
-#   }
+resource "aws_internet_gateway" "igw" {
+  vpc_id = aws_vpc.vpc.id
+}
 
-# }
+resource "aws_eip" "nat" {
+  domain = "vpc"
 
-# resource "aws_route_table_association" "rtassoc1" {
-#   route_table_id = aws_route_table.rt01.id
-#   subnet_id = aws_subnet.pub_sub_01.id
-# }
+  # Ensure Internet Gateway is created before the EIP
+  depends_on = [aws_internet_gateway.igw]
+}
 
-# resource "aws_route_table_association" "rtassoc2" {
-#   route_table_id = aws_route_table.rt01.id
-#   subnet_id = aws_subnet.pub_sub_02.id
-# }
+resource "aws_nat_gateway" "nat01" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.pub_sub_01.id
 
-# resource "aws_security_group" "sg-libraai" {
-#   vpc_id = aws_vpc.vpc.id
+  tags = {
+    Name = "main-nat-gateway"
+  }
 
-#   ingress {
-#     description = "ssh"
-#     from_port = 22
-#     to_port = 22
-#     protocol = "tcp"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
+  # Ensure proper dependency setup
+  depends_on = [aws_internet_gateway.igw]
+}
 
-#   ingress {
-#     description = "opening port no 80 for http"
-#     from_port = 80
-#     to_port = 80
-#     protocol = "tcp"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
+resource "aws_route_table" "private_rt" {
+  vpc_id = aws_vpc.vpc.id
 
-#   egress {
-#     from_port = 0
-#     to_port = 0
-#     protocol = "-1"
-#     cidr_blocks = ["0.0.0.0/0"]
-#   }
-# }
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.nat01.id
+  }
+
+  tags = {
+    Name = "private-route-table"
+  }
+}
+
+resource "aws_route_table" "rt01" {
+  vpc_id = aws_vpc.vpc.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.igw.id
+  }
+
+}
+
+resource "aws_route_table_association" "rtassoc1" {
+  route_table_id = aws_route_table.rt01.id
+  subnet_id = aws_subnet.pub_sub_01.id
+}
+
+resource "aws_route_table_association" "rtassoc2" {
+  route_table_id = aws_route_table.rt01.id
+  subnet_id = aws_subnet.pub_sub_02.id
+}
+
+resource "aws_route_table_association" "rtassoc3" {
+  route_table_id = aws_route_table.private_rt.id
+  subnet_id = aws_subnet.private_sub_01.id
+}
+
+resource "aws_route_table_association" "rtassoc4" {
+  route_table_id = aws_route_table.private_rt.id
+  subnet_id = aws_subnet.private_sub_02.id
+}
+
+resource "aws_security_group" "sg-libraai" {
+  vpc_id = aws_vpc.vpc.id
+
+  ingress {
+    description = "ssh"
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    description = "opening port no 80 for http"
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port = 0
+    to_port = 0
+    protocol = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
 
 # resource "aws_launch_template" "libraai-lunch-template" {
 #   name_prefix = "libraai-lt-"
