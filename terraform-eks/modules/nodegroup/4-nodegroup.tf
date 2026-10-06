@@ -30,12 +30,12 @@ role       = aws_iam_role.demo-eks-ng-role.name
 }
 
 resource "aws_eks_node_group" "demo_nodes" {
-  cluster_name    = aws_eks_cluster.demo-eks-cluster.name
+  cluster_name    = var.cluster_name
   node_group_name = "demo-node-group"
   node_role_arn   = aws_iam_role.demo-eks-ng-role.arn
   subnet_ids      = [
-    aws_subnet.private-subnet-1.id,
-    aws_subnet.private-subnet-2.id
+    var.private_subnet-01,
+    var.private_subnet-02
   ]
 
   # Specify Instance Types (can list multiple for flex capacity)
