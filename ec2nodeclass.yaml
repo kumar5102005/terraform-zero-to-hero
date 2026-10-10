@@ -1,0 +1,28 @@
+
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  # IAM role attached to Karpenter-created EC2 nodes
+  role: KarpenterNodeRole-demo-eks-cluster
+
+  # EKS-optimized Amazon Linux 2023 AMI
+  amiSelectorTerms:
+    - alias: al2023@latest
+
+  # Discover subnets using the cluster discovery tag
+  subnetSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: demo-eks-cluster
+
+  # Discover worker-node security groups using the same tag
+  securityGroupSelectorTerms:
+    - tags:
+        karpenter.sh/discovery: demo-eks-cluster
+
+  # Custom tags applied to AWS resources created by Karpenter
+  tags:
+    Environment: dev
+    Project: demo-eks-cluster
+    ManagedBy: Karpenter

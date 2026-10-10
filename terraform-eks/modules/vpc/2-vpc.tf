@@ -6,6 +6,7 @@ data "aws_availability_zones" "available" {
 locals {
   additional_tags = {
     "kubernetes.io/cluster/${var.cluster_name}" = "owned"
+    "karpenter.sh/discovery" = "${var.cluster_name}"
 }
 }
 

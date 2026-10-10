@@ -1,0 +1,23 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Principal": {
+        "Service": "pods.eks.amazonaws.com"
+      },
+      "Action": [
+        "sts:AssumeRole",
+        "sts:TagSession"
+      ],
+      "Condition": {
+        "StringEquals": {
+          "aws:SourceAccount": "742020474734"
+        },
+        "ArnEquals": {
+          "aws:SourceArn": "arn:aws:eks:ap-south-1:742020474734:cluster/demo-eks-cluster"
+        }
+      }
+    }
+  ]
+}
